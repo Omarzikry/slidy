@@ -2,6 +2,7 @@ const path = require("path");
 
 module.exports = {
   entry: "./src/index.js",
+  mode: "development", // production
   output: {
     path: path.join(__dirname, "public"),
     filename: "bundle.js",
