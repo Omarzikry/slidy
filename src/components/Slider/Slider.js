@@ -1,11 +1,11 @@
-import React, { useState, useRef } from "react";
-import ReactDOM from "react-dom";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import img1 from "../../assets/imgs/slide1.jpg";
 import img2 from "../../assets/imgs/slide2.jpg";
+import img3 from "../../assets/imgs/slide3.jpg";
 import Pagination from "../Pagination/Pagination";
 
-const imgsArray = [
+let imgsArray = [
   {
     src: img1,
     alt: "Photographer",
@@ -15,8 +15,8 @@ const imgsArray = [
     alt: "Shoes",
   },
   {
-    src: img1,
-    alt: "Photographer",
+    src: img3,
+    alt: "jumper",
   },
 ];
 
@@ -39,7 +39,8 @@ const SSliderContent = styled.div`
   }
   img {
     height: 100%;
-    max-width: 100%;
+    width: 100%;
+    object-fit: cover;
   }
 `;
 
@@ -54,16 +55,47 @@ const Slider = (props) => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [dragStart, setDragStart] = useState(0);
   const [dragStartTime, setDragStartTime] = useState(new Date());
-  const [transition, setTransition] = useState(false);
   const [slideWidth, SetSlideWidth] = useState();
   const [lastIndex, setLastIndex] = useState(0);
-  const slider = useRef(null);
+  const [slides, setSlides] = useState(imgsArray);
+  const [isTransitioning, setIsTransitioning] = useState();
+  const slider = useRef();
+  const sliderContent = useRef();
+
+  useEffect(() => {
+    const firstElement = imgsArray.slice(0, 1)[0];
+    const lastElement = imgsArray.slice(imgsArray.length - 1)[0];
+    const slidesArray = [lastElement, ...slides, firstElement];
+    setSlides(slidesArray);
+  }, []);
+
+  useEffect(() => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      if (activeSlide === slides.length - 2) {
+        sliderContent.current.style.transition = "none";
+        setActiveSlide(0);
+        sliderContent.current.style.transform = "translate3d(-100%,0,0)";
+      }
+      if (activeSlide === -1) {
+        sliderContent.current.style.transition = "none";
+        setActiveSlide(slides.length - 3);
+        sliderContent.current.style.transform = `translate3d(${
+          -100 * (slides.length - 3) - 100
+        }%,0,0)`;
+      }
+      setIsTransitioning(false);
+    }, 700);
+  }, [activeSlide]);
 
   const nextClickHandler = () => {
-    if (activeSlide < imgsArray.length - 1) setActiveSlide(activeSlide + 1);
+    sliderContent.current.style.transition = "transform 0.7s ease";
+    if (activeSlide < slides.length - 2 && !isTransitioning)
+      setActiveSlide(activeSlide + 1);
   };
   const prevClickHandler = () => {
-    if (activeSlide !== 0) setActiveSlide(activeSlide - 1);
+    sliderContent.current.style.transition = "transform 0.7s ease";
+    if (activeSlide > -1 && !isTransitioning) setActiveSlide(activeSlide - 1);
   };
 
   const getDragX = (event, isTouch) => {
@@ -78,7 +110,6 @@ const Slider = (props) => {
 
     setDragStart(x);
     setDragStartTime(new Date());
-    setTransition(false);
 
     SetSlideWidth(slider.current.offsetWidth);
   };
@@ -114,14 +145,13 @@ const Slider = (props) => {
 
     if (newIndex < 0) {
       newIndex = 0;
-    } else if (newIndex >= imgsArray.length) {
-      newIndex = imgsArray.length - 1;
+    } else if (newIndex >= slides.length) {
+      newIndex = slides.length - 1;
     }
 
     setDragStart(0);
     setActiveSlide(newIndex);
     setLastIndex(newIndex);
-    setTransition(true);
   };
 
   //TODO: automatic slide
@@ -135,12 +165,13 @@ const Slider = (props) => {
     <SSliderContainer>
       <SSlider ref={slider}>
         <SSliderContent
-          style={{ transform: `translate3d(${-100 * activeSlide}%,0,0)` }}
+          style={{ transform: `translate3d(${-100 * activeSlide - 100}%,0,0)` }}
           onTouchStart={(event) => handleDragStart(event, true)}
           onTouchMove={(event) => handleDragMove(event, true)}
           onTouchEnd={() => handleDragEnd(true)}
+          ref={sliderContent}
         >
-          {imgsArray.map((img, index) => {
+          {slides.map((img, index) => {
             return (
               <div key={index}>
                 <img src={img.src} alt={img.alt} />
