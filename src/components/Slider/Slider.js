@@ -3,7 +3,7 @@ import styled from "styled-components";
 import img1 from "../../assets/imgs/slide1.jpg";
 import img2 from "../../assets/imgs/slide2.jpg";
 import img3 from "../../assets/imgs/slide3.jpg";
-import Pagination from "../Pagination/Pagination";
+import Arrows from "../Arrows/Arrows";
 
 let imgsArray = [
   {
@@ -75,11 +75,13 @@ const Slider = (props) => {
       if (activeSlide === slides.length - 2) {
         sliderContent.current.style.transition = "none";
         setActiveSlide(0);
+        setLastIndex(0);
         sliderContent.current.style.transform = "translate3d(-100%,0,0)";
       }
       if (activeSlide === -1) {
         sliderContent.current.style.transition = "none";
         setActiveSlide(slides.length - 3);
+        setLastIndex(slides.length - 3);
         sliderContent.current.style.transform = `translate3d(${
           -100 * (slides.length - 3) - 100
         }%,0,0)`;
@@ -106,6 +108,7 @@ const Slider = (props) => {
   // handle drag start
 
   const handleDragStart = (event, isTouch) => {
+    sliderContent.current.style.transition = "transform 0.7s ease";
     const x = getDragX(event, isTouch);
 
     setDragStart(x);
@@ -119,7 +122,7 @@ const Slider = (props) => {
     const x = getDragX(event, isTouch);
     const offset = dragStart - x;
     const percentageOffset = offset / slideWidth;
-    console.log(percentageOffset);
+
     const newIndex = lastIndex + percentageOffset;
     // const SCROLL_OFFSET_TO_STOP_SCROLL = 30;
 
@@ -143,11 +146,11 @@ const Slider = (props) => {
       newIndex = velocity < 0 ? lastIndex + 1 : lastIndex - 1;
     }
 
-    if (newIndex < 0) {
-      newIndex = 0;
-    } else if (newIndex >= slides.length) {
-      newIndex = slides.length - 1;
-    }
+    // if (newIndex < 0) {
+    //   newIndex = 0;
+    // } else if (newIndex >= slides.length) {
+    //   newIndex = slides.length - 1;
+    //
 
     setDragStart(0);
     setActiveSlide(newIndex);
@@ -180,7 +183,7 @@ const Slider = (props) => {
           })}
         </SSliderContent>
       </SSlider>
-      <Pagination
+      <Arrows
         nextClickHandler={nextClickHandler}
         prevClickHandler={prevClickHandler}
       />
