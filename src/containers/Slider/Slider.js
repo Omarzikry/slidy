@@ -3,7 +3,11 @@ import styled from "styled-components";
 import img1 from "../../assets/imgs/slide1.jpg";
 import img2 from "../../assets/imgs/slide2.jpg";
 import img3 from "../../assets/imgs/slide3.jpg";
-import Arrows from "../Arrows/Arrows";
+import img4 from "../../assets/imgs/slide4.jpg";
+import Arrows from "../../components/Arrows/Arrows";
+import Pagination from "../../components/Pagination/Pagination";
+import Controls from "../../components/Controls/Controls";
+import Slide from "../../components/Slide/Slide";
 
 let imgsArray = [
   {
@@ -18,12 +22,16 @@ let imgsArray = [
     src: img3,
     alt: "jumper",
   },
+  {
+    src: img4,
+    alt: "vacation",
+  },
 ];
 
 const SSlider = styled.div`
   width: 100%;
   height: 100%;
-  background-color: red;
+  background-color: ${(props) => props.theme.colors.black};
   overflow: hidden;
 `;
 
@@ -32,23 +40,30 @@ const SSliderContent = styled.div`
   height: 100%;
   width: 100%;
   transition: transform 0.7s ease;
-  div {
-    width: 100%;
-    height: 100%;
-    flex-shrink: 0;
-  }
   img {
     height: 100%;
     width: 100%;
-    object-fit: cover;
+
+    &.cover {
+      object-fit: cover;
+    }
+    &.fit {
+      object-fit: contain;
+    }
   }
 `;
 
 const SSliderContainer = styled.div`
   position: relative;
   width: 60vw;
-  height: 600px;
+  height: 70vh;
   margin: 0 auto;
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    width: 90vw;
+    height: 60vh;
+  }
 `;
 
 const Slider = (props) => {
@@ -59,9 +74,12 @@ const Slider = (props) => {
   const [lastIndex, setLastIndex] = useState(0);
   const [slides, setSlides] = useState(imgsArray);
   const [isTransitioning, setIsTransitioning] = useState();
+  const [stretch, setStretch] = useState(true);
+  const [pagination, setPagination] = useState(true);
   const slider = useRef();
   const sliderContent = useRef();
 
+  // create a clone of last and first element to make infinite loop effect
   useEffect(() => {
     const firstElement = imgsArray.slice(0, 1)[0];
     const lastElement = imgsArray.slice(imgsArray.length - 1)[0];
@@ -71,6 +89,8 @@ const Slider = (props) => {
 
   useEffect(() => {
     setIsTransitioning(true);
+
+    // wait for the animation to finish then rewind the slider to it's beginning position or end position
     setTimeout(() => {
       if (activeSlide === slides.length - 2) {
         sliderContent.current.style.transition = "none";
@@ -78,6 +98,7 @@ const Slider = (props) => {
         setLastIndex(0);
         sliderContent.current.style.transform = "translate3d(-100%,0,0)";
       }
+
       if (activeSlide === -1) {
         sliderContent.current.style.transition = "none";
         setActiveSlide(slides.length - 3);
@@ -86,29 +107,33 @@ const Slider = (props) => {
           -100 * (slides.length - 3) - 100
         }%,0,0)`;
       }
+
       setIsTransitioning(false);
     }, 700);
   }, [activeSlide]);
 
+  // handle when next button clicked
   const nextClickHandler = () => {
     sliderContent.current.style.transition = "transform 0.7s ease";
     if (activeSlide < slides.length - 2 && !isTransitioning)
       setActiveSlide(activeSlide + 1);
   };
+
+  // handle when prev button clicked
   const prevClickHandler = () => {
     sliderContent.current.style.transition = "transform 0.7s ease";
     if (activeSlide > -1 && !isTransitioning) setActiveSlide(activeSlide - 1);
   };
 
+  // get drag on x value weather the device is touch or not
   const getDragX = (event, isTouch) => {
-    // console.log(isTouch ? "is Touch:" + event.touches[0].pageX : event.pageX);
     return isTouch ? event.touches[0].pageX : event.pageX;
   };
 
   // handle drag start
-
   const handleDragStart = (event, isTouch) => {
     sliderContent.current.style.transition = "transform 0.7s ease";
+
     const x = getDragX(event, isTouch);
 
     setDragStart(x);
@@ -117,20 +142,13 @@ const Slider = (props) => {
     SetSlideWidth(slider.current.offsetWidth);
   };
 
-  // handle drag start
+  // handle drag Move
   const handleDragMove = (event, isTouch) => {
     const x = getDragX(event, isTouch);
     const offset = dragStart - x;
     const percentageOffset = offset / slideWidth;
-
     const newIndex = lastIndex + percentageOffset;
-    // const SCROLL_OFFSET_TO_STOP_SCROLL = 30;
 
-    // Stop scrolling if you slide more than 30 pixels
-    // if (Math.abs(offset) > SCROLL_OFFSET_TO_STOP_SCROLL) {
-    //   event.stopPropagation();
-    //   event.preventDefault();
-    // }
     setActiveSlide(newIndex);
   };
 
@@ -142,52 +160,79 @@ const Slider = (props) => {
 
     let newIndex = Math.round(activeSlide);
 
+    // set a threshold for swiping
     if (Math.abs(velocity) > 5) {
       newIndex = velocity < 0 ? lastIndex + 1 : lastIndex - 1;
     }
-
-    // if (newIndex < 0) {
-    //   newIndex = 0;
-    // } else if (newIndex >= slides.length) {
-    //   newIndex = slides.length - 1;
-    //
 
     setDragStart(0);
     setActiveSlide(newIndex);
     setLastIndex(newIndex);
   };
 
-  //TODO: automatic slide
-  //   const autoSlide = () => {
-  //     setInterval(() => {
-  //       if (activeSlide < imgsArray.length - 1) setActiveSlide(activeSlide + 1);
-  //     }, 2000);
-  //   };
+  // Go to specific slide
+  const goToSlide = (index) => {
+    sliderContent.current.style.transition = "transform 0.7s ease";
+    setActiveSlide(index);
+    setLastIndex(index);
+  };
+
+  // toggle fit or cover
+  const handleStretchElement = () => {
+    setStretch(!stretch);
+  };
+
+  // toggle Pagination
+  const togglePagination = () => {
+    setPagination(!pagination);
+  };
 
   return (
-    <SSliderContainer>
-      <SSlider ref={slider}>
-        <SSliderContent
-          style={{ transform: `translate3d(${-100 * activeSlide - 100}%,0,0)` }}
-          onTouchStart={(event) => handleDragStart(event, true)}
-          onTouchMove={(event) => handleDragMove(event, true)}
-          onTouchEnd={() => handleDragEnd(true)}
-          ref={sliderContent}
-        >
-          {slides.map((img, index) => {
-            return (
-              <div key={index}>
-                <img src={img.src} alt={img.alt} />
-              </div>
-            );
-          })}
-        </SSliderContent>
-      </SSlider>
-      <Arrows
-        nextClickHandler={nextClickHandler}
-        prevClickHandler={prevClickHandler}
+    <>
+      <Controls
+        stretch={stretch}
+        handleStretchElement={handleStretchElement}
+        togglePagination={togglePagination}
+        pagination={pagination}
       />
-    </SSliderContainer>
+      <SSliderContainer>
+        <SSlider ref={slider}>
+          <SSliderContent
+            style={{
+              transform: `translate3d(${-100 * activeSlide - 100}%,0,0)`,
+            }}
+            onTouchStart={(event) => handleDragStart(event, true)}
+            onTouchMove={(event) => handleDragMove(event, true)}
+            onTouchEnd={() => handleDragEnd(true)}
+            ref={sliderContent}
+          >
+            {slides.map((img, index) => {
+              return (
+                <Slide key={index}>
+                  <img
+                    src={img.src}
+                    alt={img.alt}
+                    className={stretch ? "cover" : "fit"}
+                  />
+                </Slide>
+              );
+            })}
+          </SSliderContent>
+        </SSlider>
+        <Arrows
+          nextClickHandler={nextClickHandler}
+          prevClickHandler={prevClickHandler}
+        />
+        {pagination && (
+          <Pagination
+            slides={imgsArray}
+            goToSlide={goToSlide}
+            isTransitioning={isTransitioning}
+            activeIndex={activeSlide}
+          />
+        )}
+      </SSliderContainer>
+    </>
   );
 };
 

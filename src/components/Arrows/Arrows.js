@@ -18,6 +18,9 @@ const SArrows = styled.div`
       outline: 0;
     }
   }
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const SArrowPrevBtn = styled.button`
@@ -36,7 +39,7 @@ const SPrevImg = styled.img`
   transform: rotate(180deg);
 `;
 
-const Slider = (props) => {
+const Arrows = (props) => {
   const [activeSlide, setActiveSlide] = useState(0);
   const { nextClickHandler, prevClickHandler } = props;
 
@@ -53,4 +56,4 @@ const Slider = (props) => {
   );
 };
 
-export default Slider;
+export default Arrows;
