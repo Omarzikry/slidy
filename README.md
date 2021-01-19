@@ -1,4 +1,4 @@
-# Slidy
+# Slidy - [Demo](http://slidy.surge.sh)
 
 Only slider that you will ever need
 
@@ -52,3 +52,7 @@ In order to build the production version of your project run **npm run build** f
 - @babel/preset-react
 - @babel/preset-env
 - @babel/core
+
+## Authors
+
+- **Omar Zikry** - _Initial work_ - [Omar Zikry](https://omarzikry.com)
