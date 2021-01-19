@@ -62,7 +62,7 @@ const SSliderContainer = styled.div`
 
   @media (max-width: 768px) {
     width: 90vw;
-    height: 60vh;
+    height: 50vh;
   }
 `;
 

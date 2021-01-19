@@ -24,7 +24,8 @@ const App = () => {
     <>
       <STitle>Slidy Demo</STitle>
       <SAlert>
-        Please switch to phone to test swiping <a href="#">Demo</a>{" "}
+        Please switch to phone to test swiping{" "}
+        <a href="http://slidy.surge.sh/">Demo</a>{" "}
         <span>(Infinite Supported)</span>
       </SAlert>
       <Slider />
